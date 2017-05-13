@@ -4,7 +4,7 @@ function getRawLoanInfo(title, separator) {
     return str.split(separator);
 }
 
-// parses loanInfo to pull out a specific string from the loan
+// parses loanInfo to pull out a specific collection of strings from the loan
 function parseLoanInfo(loanInfo, begIndex, endIndexStr) {
     var infos = [];
     $.each(loanInfo, function() {
