@@ -1,7 +1,7 @@
 // get array of strings representing each loan's information
 function getRawLoanInfo(title, separator) {
-    var str = $($($('ul[title="' + title + '"]')).children()).text();
-    return str.split(separator);
+    var loanInfo = $($($('ul[title="' + title + '"]')).children()).text();
+    return loanInfo.split(separator);
 }
 
 // parses loanInfo to pull out a specific collection of strings from the loan
