@@ -1,32 +1,34 @@
-function getLoanInfos(title, splitStr) {
-    var str = $($($("ul[title=\"" + title + "\"]")).children()).text();
-    return str.split(splitStr);
+// get array of strings representing each loan's information
+function getRawLoanInfo(title, separator) {
+    var str = $($($('ul[title="' + title + '"]')).children()).text();
+    return str.split(separator);
 }
 
-function getLoanInfo(loanInfos, begIndex, endIndexStr) {
+// parses loanInfo to pull out a specific string from the loan
+function parseLoanInfo(loanInfo, begIndex, endIndexStr) {
     var infos = [];
-    $.each(loanInfos, function() {
+    $.each(loanInfo, function() {
         var endIndex = this.indexOf(endIndexStr);
         var info = this.substring(begIndex, endIndex);
-        info = info.replace(",", "");
-        if(info != "") {
+        info = info.replace(',', '');
+        if (info) {
             infos.push(info);
         }
     });
     return infos;
 }
 
-var loanBalances = getLoanInfos("Loan Balance", "Original Balance: $");
-loanBalances = getLoanInfo(loanBalances, 0, "Unpaid Interest");
+var loanBalances = getRawLoanInfo('Loan Balance', 'Original Balance: $');
+loanBalances = parseLoanInfo(loanBalances, 0, 'Unpaid Interest');
 
-var loanInterests = getLoanInfos("Interest Rate Information", "Interest Rate:");
-loanInterests = getLoanInfo(loanInterests, 29, "%");
+var loanInterests = getRawLoanInfo('Interest Rate Information', 'Interest Rate:');
+loanInterests = parseLoanInfo(loanInterests, 29, '%');
 
 var loanTotal = loanBalances.reduce((pv,cv)=>{
    return pv + (parseFloat(cv)||0);
 },0);
 
-console.log("Loan total: $" + loanTotal.toLocaleString()); // localeString to add commas :)
+console.log('Loan total: $' + loanTotal.toLocaleString()); // localeString to add commas :)
 
 var weightedInterest = 0;
 for(var i = 0; i < loanBalances.length; ++i) {
@@ -37,4 +39,4 @@ for(var i = 0; i < loanBalances.length; ++i) {
     weightedInterest += interest * fractionOfTotalBalance;
 }
 
-console.log("Weighted interest: " + weightedInterest.toFixed(2) + "%");
+console.log('Weighted interest: ' + weightedInterest.toFixed(2) + '%');
