@@ -19,15 +19,17 @@ function parseLoanInfo(loanInfo, begIndex, endIndexStr) {
 }
 
 // creates an object representing the loans
-// returns { remaining: [], paid: [] }
+// returns { remaining: [], paid: [], total: <number> }
 function createLoans(loanBalances, loanInterests) {
     var remainingLoans = [];
     var paidLoans = [];
+    var total = 0;
 
     for(var i = 0; i < loanBalances.length; ++i) {
         var balance = loanBalances[i];
         var interest = loanInterests[i];
-        (balance ? remainingLoans : paidLoans).push({
+        total += balance;
+        (balance == 0 ? paidLoans : remainingLoans).push({
             balance: balance,
             interest: interest
         });
@@ -39,7 +41,8 @@ function createLoans(loanBalances, loanInterests) {
 
     return {
         remaining: remainingLoans,
-        paid: paidLoans
+        paid: paidLoans,
+        total: total
     }
 }
 
@@ -49,7 +52,7 @@ function getWeightedInterest(loans) {
     for(var i = 0; i < loans.remaining.length; ++i) {
         var loan = loans.remaining[i];
 
-        var fractionOfTotalBalance = loan.balance / loanTotal;
+        var fractionOfTotalBalance = loan.balance / loans.loanTotal;
 
         weightedInterest += loan.interest * fractionOfTotalBalance;
     }
@@ -63,17 +66,12 @@ function analyzeLoans() {
     var loanInterests = getRawLoanInfo('Interest Rate Information', 'Interest Rate:');
     loanInterests = parseLoanInfo(loanInterests, 29, '%');
 
-    var loanTotal = loanBalances.reduce((pv,cv)=>{
-            return pv + (parseFloat(cv)||0);
-    },0);
-
-    console.log('Loan total: $' + loanTotal.toLocaleString()); // localeString to add commas :)
-
     var loans = createLoans(loanBalances, loanInterests);
-
+    
+    console.log('Loan total: $' + loans.total.toLocaleString()); // localeString to add commas :)
     console.log('Weighted average interest: ' + getWeightedInterest(loans).toFixed(2) + '%');
-
-    console.table(loans);
+    console.table(loans.remaining);
+    console.table(loans.paid);
 }
 
 analyzeLoans();
