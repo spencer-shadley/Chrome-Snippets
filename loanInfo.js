@@ -20,7 +20,7 @@ function parseLoanInfo(loanInfo, begIndex, endIndexStr) {
 
 // creates an object representing the loans
 // returns {
-    // remaining: { loans: [{balance: <number>, interest: <number>}] },
+    // remaining: { loans: [{balance: <number>, interest: <number>}], total: <number> },
     // paid: [{balance: <number>, interest: <number>}]
 // }
 function createLoans(loanBalances, loanInterests) {
@@ -51,15 +51,12 @@ function createLoans(loanBalances, loanInterests) {
     }
 }
 
-function getWeightedInterest(loans) {
+function getWeightedInterest(remainingLoans) {
     var weightedInterest = 0;
-    for(var i = 0; i < loans.loans.length; ++i) {
-        var loan = loans.loans[i];
-
-        var fractionOfTotalBalance = loan.balance / loans.total;
-
+    $.each(remainingLoans.loans, function(ignoredIndex, loan) {
+        var fractionOfTotalBalance = loan.balance / remainingLoans.total;
         weightedInterest += loan.interest * fractionOfTotalBalance;
-    }
+    });
     return weightedInterest;
 }
 
