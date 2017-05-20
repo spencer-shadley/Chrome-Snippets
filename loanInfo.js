@@ -39,4 +39,26 @@ for(var i = 0; i < loanBalances.length; ++i) {
     weightedInterest += interest * fractionOfTotalBalance;
 }
 
-console.log('Weighted interest: ' + weightedInterest.toFixed(2) + '%');
+console.log('Weighted average interest: ' + weightedInterest.toFixed(2) + '%');
+
+var remainingLoans = [];
+var paidLoans = [];
+
+for(var i = 0; i < loanBalances.length; ++i) {
+    var balance = loanBalances[i];
+    var interest = loanInterests[i];
+    (balance == 0 ? paidLoans : remainingLoans).push({
+        balance: loanBalances[i],
+        interest: loanInterests[i]
+    });
+}
+
+remainingLoans.sort(function(a, b) {
+    return b.interest - a.interest;
+});
+
+console.log('remaining loans');
+console.table(remainingLoans);
+
+console.log('paid loans');
+console.table(paidLoans);
