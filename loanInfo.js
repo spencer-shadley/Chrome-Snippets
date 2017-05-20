@@ -53,9 +53,9 @@ function createLoans(loanBalances, loanInterests) {
 
 function getWeightedInterest(remainingLoans) {
     var weightedInterest = 0;
-    $.each(remainingLoans.loans, function(ignoredIndex, loan) {
-        var fractionOfTotalBalance = loan.balance / remainingLoans.total;
-        weightedInterest += loan.interest * fractionOfTotalBalance;
+    $.each(remainingLoans.loans, function() {
+        var fractionOfTotalBalance = this.balance / remainingLoans.total;
+        weightedInterest += this.interest * fractionOfTotalBalance;
     });
     return weightedInterest;
 }
