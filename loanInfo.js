@@ -19,7 +19,10 @@ function parseLoanInfo(loanInfo, begIndex, endIndexStr) {
 }
 
 // creates an object representing the loans
-// returns { remaining: [], paid: [], total: <number> }
+// returns {
+    // remaining: { loans: [{balance: <number>, interest: <number>}] },
+    // paid: [{balance: <number>, interest: <number>}]
+// }
 function createLoans(loanBalances, loanInterests) {
     var remainingLoans = [];
     var paidLoans = [];
@@ -40,19 +43,20 @@ function createLoans(loanBalances, loanInterests) {
     });
 
     return {
-        remaining: remainingLoans,
-        paid: paidLoans,
-        total: total
+        remaining: {
+            loans: remainingLoans,
+            total: total
+        },
+        paid: paidLoans
     }
 }
 
-// calculates the weighted average interest of the remaining loans
 function getWeightedInterest(loans) {
     var weightedInterest = 0;
-    for(var i = 0; i < loans.remaining.length; ++i) {
-        var loan = loans.remaining[i];
+    for(var i = 0; i < loans.loans.length; ++i) {
+        var loan = loans.loans[i];
 
-        var fractionOfTotalBalance = loan.balance / loans.loanTotal;
+        var fractionOfTotalBalance = loan.balance / loans.total;
 
         weightedInterest += loan.interest * fractionOfTotalBalance;
     }
@@ -66,12 +70,12 @@ function analyzeLoans() {
     var loanInterests = getRawLoanInfo('Interest Rate Information', 'Interest Rate:');
     loanInterests = parseLoanInfo(loanInterests, 29, '%');
 
-    var loans = createLoans(loanBalances, loanInterests);
-    
-    console.log('Loan total: $' + loans.total.toLocaleString()); // localeString to add commas :)
-    console.log('Weighted average interest: ' + getWeightedInterest(loans).toFixed(2) + '%');
-    console.table(loans.remaining);
-    console.table(loans.paid);
+    var allLoans = createLoans(loanBalances, loanInterests);
+
+    console.log('Loan total: $' + allLoans.remaining.total.toLocaleString()); // localeString to add commas :)
+    console.log('Weighted average interest: ' + getWeightedInterest(allLoans.remaining).toFixed(2) + '%');
+    console.table(allLoans.remaining.loans);
+    console.table(allLoans.paid);
 }
 
 analyzeLoans();
