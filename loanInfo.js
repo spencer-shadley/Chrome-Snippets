@@ -18,47 +18,62 @@ function parseLoanInfo(loanInfo, begIndex, endIndexStr) {
     return infos;
 }
 
-var loanBalances = getRawLoanInfo('Loan Balance', 'Original Balance: $');
-loanBalances = parseLoanInfo(loanBalances, 0, 'Unpaid Interest');
+// creates an object representing the loans
+// returns { remaining: [], paid: [] }
+function createLoans(loanBalances, loanInterests) {
+    var remainingLoans = [];
+    var paidLoans = [];
 
-var loanInterests = getRawLoanInfo('Interest Rate Information', 'Interest Rate:');
-loanInterests = parseLoanInfo(loanInterests, 29, '%');
+    for(var i = 0; i < loanBalances.length; ++i) {
+        var balance = loanBalances[i];
+        var interest = loanInterests[i];
+        (balance ? remainingLoans : paidLoans).push({
+            balance: balance,
+            interest: interest
+        });
+    }
 
-var loanTotal = loanBalances.reduce((pv,cv)=>{
-   return pv + (parseFloat(cv)||0);
-},0);
-
-console.log('Loan total: $' + loanTotal.toLocaleString()); // localeString to add commas :)
-
-var weightedInterest = 0;
-for(var i = 0; i < loanBalances.length; ++i) {
-    var balance = loanBalances[i];
-    var fractionOfTotalBalance = balance / loanTotal;
-
-    var interest = loanInterests[i];
-    weightedInterest += interest * fractionOfTotalBalance;
-}
-
-console.log('Weighted average interest: ' + weightedInterest.toFixed(2) + '%');
-
-var remainingLoans = [];
-var paidLoans = [];
-
-for(var i = 0; i < loanBalances.length; ++i) {
-    var balance = loanBalances[i];
-    var interest = loanInterests[i];
-    (balance == 0 ? paidLoans : remainingLoans).push({
-        balance: loanBalances[i],
-        interest: loanInterests[i]
+    remainingLoans.sort(function(a, b) {
+        return b.interest - a.interest;
     });
+
+    return {
+        remaining: remainingLoans,
+        paid: paidLoans
+    }
 }
 
-remainingLoans.sort(function(a, b) {
-    return b.interest - a.interest;
-});
+// calculates the weighted average interest of the remaining loans
+function getWeightedInterest(loans) {
+    var weightedInterest = 0;
+    for(var i = 0; i < loans.remaining.length; ++i) {
+        var loan = loans.remaining[i];
 
-console.log('remaining loans');
-console.table(remainingLoans);
+        var fractionOfTotalBalance = loan.balance / loanTotal;
 
-console.log('paid loans');
-console.table(paidLoans);
+        weightedInterest += loan.interest * fractionOfTotalBalance;
+    }
+    return weightedInterest;
+}
+
+function analyzeLoans() {
+    var loanBalances = getRawLoanInfo('Loan Balance', 'Original Balance: $');
+    loanBalances = parseLoanInfo(loanBalances, 0, 'Unpaid Interest');
+
+    var loanInterests = getRawLoanInfo('Interest Rate Information', 'Interest Rate:');
+    loanInterests = parseLoanInfo(loanInterests, 29, '%');
+
+    var loanTotal = loanBalances.reduce((pv,cv)=>{
+            return pv + (parseFloat(cv)||0);
+    },0);
+
+    console.log('Loan total: $' + loanTotal.toLocaleString()); // localeString to add commas :)
+
+    var loans = createLoans(loanBalances, loanInterests);
+
+    console.log('Weighted average interest: ' + getWeightedInterest(loans).toFixed(2) + '%');
+
+    console.table(loans);
+}
+
+analyzeLoans();
