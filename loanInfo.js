@@ -11,9 +11,7 @@ function parseLoanInfo(loanInfo, begIndex, endIndexStr) {
         var endIndex = this.indexOf(endIndexStr);
         var info = this.substring(begIndex, endIndex);
         info = info.replace(',', '');
-        if (info) {
-            infos.push(parseFloat(info));
-        }
+        if (info) infos.push(parseFloat(info));
     });
     return infos;
 }
